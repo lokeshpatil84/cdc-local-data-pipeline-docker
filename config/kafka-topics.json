@@ -1,0 +1,41 @@
+{
+  "topics": [
+    {
+      "name": "dbserver1.ecommerce.orders",
+      "partitions": 1,
+      "replicationFactor": 1,
+      "config": {
+        "retention.ms": "604800000",
+        "cleanup.policy": "delete"
+      }
+    },
+    {
+      "name": "dbserver1.ecommerce.customers",
+      "partitions": 1,
+      "replicationFactor": 1,
+      "config": {
+        "retention.ms": "604800000",
+        "cleanup.policy": "delete"
+      }
+    },
+    {
+      "name": "dbserver1.ecommerce.products",
+      "partitions": 1,
+      "replicationFactor": 1,
+      "config": {
+        "retention.ms": "604800000",
+        "cleanup.policy": "delete"
+      }
+    },
+    {
+      "name": "debezium-errors",
+      "partitions": 1,
+      "replicationFactor": 1,
+      "config": {
+        "retention.ms": "2592000000",
+        "cleanup.policy": "delete"
+      }
+    }
+  ]
+}
+

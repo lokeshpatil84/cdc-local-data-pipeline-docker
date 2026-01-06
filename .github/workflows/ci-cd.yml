@@ -1,0 +1,169 @@
+name: E-Commerce CDC Pipeline CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black
+          
+      - name: Lint Python files
+        run: |
+          # Check Python syntax
+          python -m py_compile run_pipeline.py glue-jobs/*.py airflow/dags/*.py
+          echo "Python syntax check passed"
+          
+      - name: Check Shell scripts
+        run: |
+          # Basic shell script check
+          bash -n run_pipeline.sh
+          bash -n cleanup.sh
+          echo "Shell script syntax check passed"
+
+      - name: Validate Docker Compose
+        run: |
+          cd docker
+          docker-compose config --quiet || exit 1
+          echo "Docker Compose configuration is valid"
+
+  build-push-images:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for PostgreSQL
+        id: meta-postgres
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/postgres
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+
+      - name: Build and push PostgreSQL
+        uses: docker/build-push-action@v5
+        with:
+          context: ./docker/postgres
+          push: true
+          tags: ${{ steps.meta-postgres.outputs.tags }}
+          labels: ${{ steps.meta-postgres.outputs.labels }}
+
+      - name: Extract metadata for Airflow
+        id: meta-airflow
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/airflow
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+
+      - name: Build and push Airflow
+        uses: docker/build-push-action@v5
+        with:
+          context: ./airflow
+          push: true
+          tags: ${{ steps.meta-airflow.outputs.tags }}
+          labels: ${{ steps.meta-airflow.outputs.labels }}
+
+      - name: Extract metadata for Glue
+        id: meta-glue
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/glue
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+
+      - name: Build and push Glue
+        uses: docker/build-push-action@v5
+        with:
+          context: ./docker/glue
+          push: true
+          tags: ${{ steps.meta-glue.outputs.tags }}
+          labels: ${{ steps.meta-glue.outputs.labels }}
+
+  smoke-test:
+    needs: build-push-images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      - name: Start infrastructure
+        run: |
+          cd docker
+          docker-compose up -d postgres kafka debezium minio
+          
+      - name: Wait for services
+        run: |
+          echo "Waiting for services to be ready..."
+          sleep 45
+          
+      - name: Check PostgreSQL
+        run: |
+          until docker exec ecommerce-postgres pg_isready -U postgres; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          echo "PostgreSQL is ready"
+          
+      - name: Check Kafka
+        run: |
+          until docker exec kafka kafka-broker-api-versions --bootstrap-server kafka:9092 2>/dev/null | grep -q kafka; do
+            echo "Waiting for Kafka..."
+            sleep 2
+          done
+          echo "Kafka is ready"
+          
+      - name: Check MinIO
+        run: |
+          curl -s http://localhost:9000/minio/health/live && echo "MinIO is ready"
+          
+      - name: Stop services
+        run: |
+          cd docker
+          docker-compose down -v
+

@@ -1,0 +1,185 @@
+
+# -------------------------------------------
+# SENSITIVE DATA & SECRETS
+# -------------------------------------------
+# NEVER commit these files!
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+credentials.json
+secrets/
+private_key.pem
+api_keys.json
+
+# AWS Credentials
+.aws/
+aws_credentials.json
+aws_access_key*
+aws_secret_key*
+
+# Database Credentials (already in config/)
+config/debezium-config.json.bak
+
+# -------------------------------------------
+# IDE & EDITOR FILES
+# -------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# PyCharm
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# -------------------------------------------
+# PYTHON
+# -------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/.installed.cfg
+*.egg-info/PKG-INFO
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+*.venv/
+
+# -------------------------------------------
+# DOCKER
+# -------------------------------------------
+docker-compose.override.yml
+docker/volumes/
+docker/data/
+*.tar
+*.tar.gz
+
+# Docker images (large binary files)
+*.image
+*.docker-image
+
+# MinIO data
+minio-data/
+
+# -------------------------------------------
+# LOGS & TEMP FILES
+# -------------------------------------------
+*.log
+logs/
+*.tmp
+*.temp
+temp/
+tmp/
+*.bak
+*.backup
+
+# -------------------------------------------
+# TERRAFORM STATE (if using remote state)
+# -------------------------------------------
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
+crash.*.log
+
+# -------------------------------------------
+# LOCAL DEVELOPMENT
+# -------------------------------------------
+.local/
+.cache/
+*.local
+.wercker/
+.octocatalog/
+.rspec
+
+# -------------------------------------------
+# TEST FILES
+# -------------------------------------------
+.pytest_cache/
+.hypothesis/
+*.test.*
+coverage.xml
+.nyc_output/
+
+# -------------------------------------------
+# SPARK & GLUE
+# ------------------------------------------
+spark-warehouse/
+metastore_db/
+derby.log
+*.jars
+lib/
+dependencies/
+
+# -------------------------------------------
+# DATA FILES (sample data, generated data)
+# -------------------------------------------
+data/
+sample-data/
+*.csv
+*.parquet
+*.jsonl
+output/
+results/
+
+# -------------------------------------------
+# MAC OS
+# -------------------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+
+# -------------------------------------------
+# MARKDOWN FILES & DOCUMENTATION (local use only)
+# -------------------------------------------
+*.md
+*.MD
+*.markdown
+*.txt
+README.md
+EXECUTION_PLAN.md
+fix.md
+GLUE_LOCAL_README.md
+PIPELINE_COMMANDS.md
+PIPELINE_GUIDE.md
+QUICK_START.md
+TODO.md
+

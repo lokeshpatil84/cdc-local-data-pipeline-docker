@@ -1,0 +1,30 @@
+{
+  "name": "postgres-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "postgres123",
+    "database.dbname": "ecommerce",
+    "database.server.name": "dbserver1",
+    "table.include.list": "ecommerce.customers,ecommerce.products,ecommerce.orders,ecommerce.order_items",
+    "plugin.name": "pgoutput",
+    "publication.name": "dbz_publication",
+    "slot.name": "debezium_slot",
+    "topic.prefix": "dbserver1",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+    "transforms": "unwrap",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "false",
+    "snapshot.mode": "initial",
+    "heartbeat.interval.ms": "10000",
+    "errors.max.retries": "3",
+    "errors.deadletterqueue.topic.name": "debezium-errors",
+    "errors.deadletterqueue.context.headers.enable": "true"
+  }
+}
+

@@ -1,0 +1,145 @@
+
+# -------------------------------------------
+# SENSITIVE DATA & SECRETS
+# -------------------------------------------
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+credentials.json
+secrets/
+private_key.pem
+api_keys.json
+.aws/
+aws_credentials.json
+config/debezium-config.json.bak
+
+# -------------------------------------------
+# IDE & EDITOR FILES
+# -------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# -------------------------------------------
+# PYTHON CACHE & BUILD
+# -------------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.coverage
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# -------------------------------------------
+# DOCKER & CONTAINERS
+# -------------------------------------------
+docker-compose.override.yml
+docker/volumes/
+docker/data/
+minio-data/
+*.tar
+*.tar.gz
+*.image
+*.docker-image
+
+# -------------------------------------------
+# LOGS & TEMP
+# -------------------------------------------
+*.log
+logs/
+*.tmp
+*.temp
+temp/
+tmp/
+*.bak
+*.backup
+
+# -------------------------------------------
+# TERRAFORM STATE
+# -------------------------------------------
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# -------------------------------------------
+# LOCAL CACHE
+# -------------------------------------------
+.local/
+.cache/
+.wercker/
+.octocatalog/
+
+# -------------------------------------------
+# TEST CACHE
+# -------------------------------------------
+.pytest_cache/
+.hypothesis/
+coverage.xml
+.nyc_output/
+
+# -------------------------------------------
+# SPARK & GLUE
+# ------------------------------------------
+spark-warehouse/
+metastore_db/
+derby.log
+*.jars
+lib/
+dependencies/
+
+# -------------------------------------------
+# DATA FILES
+# -------------------------------------------
+data/
+sample-data/
+*.csv
+*.parquet
+*.jsonl
+output/
+results/
+
+# -------------------------------------------
+# OS FILES
+# -------------------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+*~
+
+# -------------------------------------------
+# MARKDOWN FILES & DOCUMENTATION
+# -------------------------------------------
+*.md
+*.MD
+*.markdown
+*.txt
+README.md
+EXECUTION_PLAN.md
+fix.md
+GLUE_LOCAL_README.md
+PIPELINE_COMMANDS.md
+PIPELINE_GUIDE.md
+QUICK_START.md
+TODO.md

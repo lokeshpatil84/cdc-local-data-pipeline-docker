@@ -1,0 +1,184 @@
+version: '3.8'
+
+services:
+  postgres:
+    build: ./postgres
+    container_name: ecommerce-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: ecommerce
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
+      - "-c"
+      - "max_wal_senders=10"
+      - "-c"
+      - "max_replication_slots=10"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.9.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      CLUSTER_ID: hxIhA6FCQGCXGd3JYTcMVA
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://kafka:9092,CONTROLLER://kafka:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_DIRS: /tmp/kafka-logs
+
+  debezium:
+    image: debezium/connect:2.5
+    container_name: debezium
+    depends_on:
+      - kafka
+      - postgres
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: debezium_configs
+      OFFSET_STORAGE_TOPIC: debezium_offsets
+      STATUS_STORAGE_TOPIC: debezium_statuses
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+
+  airflow-postgres:
+    image: postgres:14
+    container_name: airflow-postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow_postgres_data:/var/lib/postgresql/data
+
+  airflow-webserver:
+    build: ../airflow
+    container_name: airflow-webserver
+    depends_on:
+      - airflow-postgres
+    user: root
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
+      AIRFLOW__CORE__FERNET_KEY: 'UKMzEm3yIuFYEq1y3-2FxPNWSVwRASpahmQ9kQfEr8E='
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__WEBSERVER__SECRET_KEY: 'secret'
+      HOME: /home/airflow
+      PATH: /home/airflow/.local/bin:/usr/local/bin:/usr/bin:/bin
+    volumes:
+      - ../airflow/dags:/opt/airflow/dags
+      - airflow_logs:/opt/airflow/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8090:8080"
+    command: >
+      bash -c "airflow db init &&
+               airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com &&
+               airflow webserver"
+
+  airflow-scheduler:
+    build: ../airflow
+    container_name: airflow-scheduler
+    depends_on:
+      - airflow-postgres
+    user: root
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
+      AIRFLOW__CORE__FERNET_KEY: 'UKMzEm3yIuFYEq1y3-2FxPNWSVwRASpahmQ9kQfEr8E='
+      HOME: /home/airflow
+      PATH: /home/airflow/.local/bin:/usr/local/bin:/usr/bin:/bin
+    volumes:
+      - ../airflow/dags:/opt/airflow/dags
+      - airflow_logs:/opt/airflow/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: airflow scheduler
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  minio-init:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 admin admin123 &&
+      mc mb -p local/warehouse || true
+      "
+    restart: "no"
+
+  glue-local:
+    build:
+      context: ..
+      dockerfile: docker/glue/Dockerfile
+    container_name: glue-local
+    depends_on:
+      - minio
+      - kafka
+    environment:
+      PYSPARK_PYTHON: python3
+      PYTHONPATH: /workspace/glue-jobs:$PYTHONPATH
+      # MinIO Configuration (S3-compatible storage)
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: admin123
+      AWS_ENDPOINT_URL: http://minio:9000
+      AWS_REGION: us-east-1
+      # Spark classpath for S3A and Kafka support (all JARs baked in image)
+      SPARK_CLASSPATH: /opt/spark/jars/spark-token-provider-kafka-0-10_2.12-3.5.0.jar:/opt/spark/jars/spark-sql-kafka-0-10_2.12-3.5.0.jar:/opt/spark/jars/kafka-clients-3.6.1.jar:/opt/spark/jars/commons-pool2-2.12.0.jar:/opt/spark/jars/hadoop-aws-3.3.4.jar:/opt/spark/jars/aws-java-sdk-bundle-1.12.610.jar:/opt/spark/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar
+    volumes:
+      - ../glue-jobs:/workspace/glue-jobs
+      - glue_warehouse:/workspace/warehouse
+    entrypoint: ["tail", "-f", "/dev/null"]
+
+volumes:
+  postgres_data:
+  airflow_postgres_data:
+  airflow_logs:
+  minio_data:
+  glue_warehouse:
+
