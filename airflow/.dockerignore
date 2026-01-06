@@ -1,9 +1,0 @@
-# Include requirements.txt for Docker build
-!requirements.txt
-
-# Exclude unnecessary files
-*.pyc
-*.pyo
-__pycache__
-*.egg-info
-
