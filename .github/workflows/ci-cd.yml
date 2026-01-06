@@ -87,9 +87,12 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./docker/postgres
+          file: ./docker/postgres/Dockerfile
           push: true
           tags: ${{ steps.meta-postgres.outputs.tags }}
           labels: ${{ steps.meta-postgres.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Extract metadata for Airflow
         id: meta-airflow
@@ -100,13 +103,21 @@ jobs:
             type=raw,value=latest
             type=sha,prefix=
 
+      - name: Debug Airflow context
+        run: |
+          ls -lah airflow
+          cat airflow/requirements.txt
+
       - name: Build and push Airflow
         uses: docker/build-push-action@v5
         with:
           context: ./airflow
+          file: ./airflow/Dockerfile
           push: true
           tags: ${{ steps.meta-airflow.outputs.tags }}
           labels: ${{ steps.meta-airflow.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Extract metadata for Glue
         id: meta-glue
@@ -121,9 +132,12 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./docker/glue
+          file: ./docker/glue/Dockerfile
           push: true
           tags: ${{ steps.meta-glue.outputs.tags }}
           labels: ${{ steps.meta-glue.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   smoke-test:
     needs: build-push-images
