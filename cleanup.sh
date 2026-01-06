@@ -6,7 +6,7 @@ echo "Stopping all Docker services..."
 cd docker
 
 # Stop and remove all containers WITH volumes (to avoid stale data issues)
-docker-compose down -v
+docker compose down -v
 
 # Also remove any orphaned containers
 docker ps -aq --filter "name=ecommerce" --filter "name=kafka" --filter "name=debezium" --filter "name=minio" --filter "name=airflow" --filter "name=glue" | xargs -r docker rm -f 2>/dev/null || true

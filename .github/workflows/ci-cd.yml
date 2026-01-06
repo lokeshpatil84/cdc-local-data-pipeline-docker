@@ -40,10 +40,15 @@ jobs:
           bash -n cleanup.sh
           echo "Shell script syntax check passed"
 
+      - name: Set up Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
       - name: Validate Docker Compose
         run: |
           cd docker
-          docker-compose config --quiet || exit 1
+          docker compose config --quiet || exit 1
           echo "Docker Compose configuration is valid"
 
   build-push-images:
@@ -135,7 +140,7 @@ jobs:
       - name: Start infrastructure
         run: |
           cd docker
-          docker-compose up -d postgres kafka debezium minio
+          docker compose up -d postgres kafka debezium minio
           
       - name: Wait for services
         run: |
@@ -165,5 +170,5 @@ jobs:
       - name: Stop services
         run: |
           cd docker
-          docker-compose down -v
+          docker compose down -v
 

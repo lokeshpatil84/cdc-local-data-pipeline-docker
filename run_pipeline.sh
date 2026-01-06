@@ -99,8 +99,8 @@ main() {
 
     # Step 1: Start Docker services
     print_header "Starting Docker Services"
-    print_info "Running: docker-compose up -d"
-    cd "$DOCKER_DIR" && docker-compose up -d
+    print_info "Running: docker compose up -d"
+    cd "$DOCKER_DIR" && docker compose up -d
 
     # Step 2: Wait for services
     print_info "Waiting for services to be ready (30s)..."
