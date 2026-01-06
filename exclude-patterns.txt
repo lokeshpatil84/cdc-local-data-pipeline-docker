@@ -2,7 +2,6 @@
 # -------------------------------------------
 # SENSITIVE DATA & SECRETS
 # -------------------------------------------
-# NEVER commit these files!
 .env
 .env.local
 .env.*.local
@@ -13,14 +12,8 @@ credentials.json
 secrets/
 private_key.pem
 api_keys.json
-
-# AWS Credentials
 .aws/
 aws_credentials.json
-aws_access_key*
-aws_secret_key*
-
-# Database Credentials (already in config/)
 config/debezium-config.json.bak
 
 # -------------------------------------------
@@ -34,39 +27,18 @@ config/debezium-config.json.bak
 .DS_Store
 Thumbs.db
 
-# PyCharm
-.idea/
-*.iml
-*.ipr
-*.iws
-
-# VSCode
-.vscode/
-*.code-workspace
-
 # -------------------------------------------
-# PYTHON
+# PYTHON CACHE & BUILD
 # -------------------------------------------
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
+*.pyc
+*.pyo
 *.egg-info/
 dist/
 build/
-eggs/
-.eggs/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/.installed.cfg
-*.egg-info/PKG-INFO
+*.egg-info/
 .pytest_cache/
 .coverage
-htmlcov/
-*.cover
 .mypy_cache/
 .ruff_cache/
 .tox/
@@ -77,26 +49,21 @@ venv/
 env/
 ENV/
 .venv/
-*.venv/
 
 # -------------------------------------------
-# DOCKER
+# DOCKER & CONTAINERS
 # -------------------------------------------
 docker-compose.override.yml
 docker/volumes/
 docker/data/
+minio-data/
 *.tar
 *.tar.gz
-
-# Docker images (large binary files)
 *.image
 *.docker-image
 
-# MinIO data
-minio-data/
-
 # -------------------------------------------
-# LOGS & TEMP FILES
+# LOGS & TEMP
 # -------------------------------------------
 *.log
 logs/
@@ -108,31 +75,27 @@ tmp/
 *.backup
 
 # -------------------------------------------
-# TERRAFORM STATE (if using remote state)
+# TERRAFORM STATE
 # -------------------------------------------
 .terraform/
 *.tfstate
 *.tfstate.*
-.terraform.lock.hcl
 crash.log
 crash.*.log
 
 # -------------------------------------------
-# LOCAL DEVELOPMENT
+# LOCAL CACHE
 # -------------------------------------------
 .local/
 .cache/
-*.local
 .wercker/
 .octocatalog/
-.rspec
 
 # -------------------------------------------
-# TEST FILES
+# TEST CACHE
 # -------------------------------------------
 .pytest_cache/
 .hypothesis/
-*.test.*
 coverage.xml
 .nyc_output/
 
@@ -147,7 +110,7 @@ lib/
 dependencies/
 
 # -------------------------------------------
-# DATA FILES (sample data, generated data)
+# DATA FILES
 # -------------------------------------------
 data/
 sample-data/
@@ -158,21 +121,22 @@ output/
 results/
 
 # -------------------------------------------
-# MAC OS
+# OS FILES
 # -------------------------------------------
 .DS_Store
 .AppleDouble
 .LSOverride
-
-# Linux
 *~
 
 # -------------------------------------------
-# MARKDOWN FILES & DOCUMENTATION (local use only)
+# MARKDOWN FILES & DOCUMENTATION
 # -------------------------------------------
 *.md
 *.MD
 *.markdown
+*.txt
+!airflow/requirements.txt
+!**/requirements.txt
 README.md
 EXECUTION_PLAN.md
 fix.md
@@ -181,7 +145,3 @@ PIPELINE_COMMANDS.md
 PIPELINE_GUIDE.md
 QUICK_START.md
 TODO.md
-
-# EXCEPTIONS - Required for Docker builds
- !airflow/requirements.txt
-

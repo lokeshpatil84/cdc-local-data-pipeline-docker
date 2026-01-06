@@ -131,8 +131,8 @@ jobs:
       - name: Build and push Glue
         uses: docker/build-push-action@v5
         with:
-          context: ./docker/glue
-          file: ./docker/glue/Dockerfile
+          context: .
+          file: docker/glue/Dockerfile
           push: true
           tags: ${{ steps.meta-glue.outputs.tags }}
           labels: ${{ steps.meta-glue.outputs.labels }}
