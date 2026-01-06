@@ -1,0 +1,7 @@
+# Exclude only these specific patterns
+# All other files including requirements.txt will be included
+
+*.pyc
+*.pyo
+*.egg-info
+
