@@ -1,0 +1,54 @@
+# Docker build ignore file
+
+# Exclude git files
+.git
+.gitignore
+
+# Exclude IDE files
+.vscode
+.idea
+
+# Exclude documentation
+*.md
+*.MD
+README.md
+EXECUTION_PLAN.md
+fix.md
+GLUE_LOCAL_README.md
+PIPELINE_COMMANDS.md
+PIPELINE_GUIDE.md
+QUICK_START.md
+TODO.md
+TODO_CICD_FIX.md
+
+# Exclude tests and cache
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+.pytest_cache
+.coverage
+
+# Exclude Docker-related files (but NOT airflow context)
+docker-compose*.yml
+docker/volumes/
+docker/data/
+minio-data/
+
+# Exclude temp files
+*.log
+logs/
+tmp/
+temp/
+
+# Exclude data files
+data/
+sample-data/
+*.csv
+*.parquet
+*.jsonl
+
+# Include necessary files for Docker builds
+!airflow/requirements.txt
+!config/
+

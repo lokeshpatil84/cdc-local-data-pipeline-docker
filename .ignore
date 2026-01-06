@@ -135,6 +135,8 @@ results/
 *.MD
 *.markdown
 *.txt
+!airflow/requirements.txt
+!**/requirements.txt
 README.md
 EXECUTION_PLAN.md
 fix.md
